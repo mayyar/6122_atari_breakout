@@ -8,6 +8,8 @@ screen_width, screen_height = 600, 600
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.display.set_caption('Breakout')
 
+font = pygame.font.SysFont('Constantia', 30)
+
 bg = (234, 218, 184)
 
 block_red = (242, 85, 96)
@@ -17,12 +19,18 @@ block_blue = (69, 177, 232)
 paddle_col = (142, 135, 123)
 paddle_outline = (100, 100, 100)
 
+text_col = (78, 81, 139)
+
 cols = 6
 rows = 6
 clock = pygame.time.Clock()
 fps = 60
 live_ball = False
-gane_over = 0
+game_over = 0
+
+def draw_text(text, font, text_col, x, y):
+    img = font.render(text, True, text_col)
+    screen.blit(img, (x, y))
 
 class wall:
     def __init__(self):
@@ -199,6 +207,17 @@ while run:
         game_over = ball.move()
         if game_over != 0:
             live_ball = False
+
+    # plyer instructions
+    if not live_ball:
+        if game_over == 0:
+            draw_text('CLICK ANYWHERE TO START', font, text_col, 100, screen_height // 2 + 100)
+        elif game_over == 1:
+            draw_text('YOU WON!', font, text_col, 240, screen_height // 2 + 50)
+            draw_text('CLICK ANYWHERE TO START', font, text_col, 100, screen_height // 2 + 100)
+        elif game_over == -1:
+            draw_text('YOU LOSE', font, text_col, 240, screen_height // 2 + 50)
+            draw_text('CLICK ANYWHERE TO START', font, text_col, 100, screen_height // 2 + 100)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
