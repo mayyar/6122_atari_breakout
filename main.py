@@ -21,6 +21,7 @@ cols = 6
 rows = 6
 clock = pygame.time.Clock()
 fps = 60
+live_ball = False
 
 class wall:
     def __init__(self):
