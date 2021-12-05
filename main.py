@@ -27,6 +27,7 @@ clock = pygame.time.Clock()
 fps = 60
 live_ball = False
 game_over = 0
+balls = []
 
 def draw_text(text, font, text_col, x, y):
     img = font.render(text, True, text_col)
@@ -53,8 +54,11 @@ class wall:
                     strength = 2
                 elif row < 6:
                     strength  = 1
-                
-                block_individual = [rect, strength]
+
+                if row == 5 and col == 5:
+                    block_individual = [rect, strength, 1]
+                else:
+                    block_individual = [rect, strength, 0]
 
                 block_row.append(block_individual)
 
@@ -127,11 +131,16 @@ class game_ball:
                     # collision form right
                     if abs(self.rect.left - block[0].right) < collision_thresh and self.speed_x < 0:
                         self.speed_x *= -1
+
+                    if block[2] == 1:
+                        balls.append((block[0].x, block[0].y))
                     
                     if wall.blocks[row_count][block_count][1] > 1:
                         wall.blocks[row_count][block_count][1] -= 1
                     else:
                         wall.blocks[row_count][block_count][0] = (0, 0, 0, 0)
+                    
+
                 
                 if wall.blocks[row_count][block_count][0] != (0, 0, 0, 0):
                     wall_destroyed = 0
@@ -167,10 +176,12 @@ class game_ball:
         self.rect.y += self.speed_y
 
         return self.game_over
+    
 
     def draw(self):
         pygame.draw.circle(screen, paddle_col, (self.rect.x + self.ball_rad, self.rect.y + self.ball_rad), self.ball_rad)
         pygame.draw.circle(screen, paddle_outline, (self.rect.x + self.ball_rad, self.rect.y + self.ball_rad), self.ball_rad, 3)
+
     
     def reset(self, x, y):
         self.ball_rad = 10
@@ -183,12 +194,14 @@ class game_ball:
         self.game_over = 0
 
 
+
 wall = wall()
 wall.create_wall()
 
 player_paddle = paddle()
 
 ball = game_ball(player_paddle.x + (player_paddle.width // 2), player_paddle.y - player_paddle.height)
+ball2 = game_ball(player_paddle.x + (player_paddle.width // 2), player_paddle.y - player_paddle.height)
 
 run = True
 while run:
@@ -205,8 +218,13 @@ while run:
     if live_ball:
         player_paddle.move()
         game_over = ball.move()
-        if game_over != 0:
+        if len(balls) == 1:
+            ball2.draw()
+            gameo_over1 = ball2.move()
+        
+        if game_over != 0 and gameo_over1 != 0:
             live_ball = False
+    
 
     # plyer instructions
     if not live_ball:
@@ -226,8 +244,10 @@ while run:
         if event.type == pygame.MOUSEBUTTONDOWN and live_ball == False:
             live_ball = True
             ball.reset(player_paddle.x + (player_paddle.width // 2), player_paddle.y - player_paddle.height)
+            ball2.reset(player_paddle.x + (player_paddle.width // 2), player_paddle.y - player_paddle.height)
             player_paddle.reset()
             wall.create_wall()
+            balls = []
 
     pygame.display.update()
 
