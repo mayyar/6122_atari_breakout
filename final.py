@@ -11,8 +11,8 @@ rows = 6
 # Number of the glut window.
 window = 0
 
-left = [-screen_width // cols // 2, -screen_height // 2 + 20]
-right = [screen_width // cols // 2, -screen_height // 2 + 20]
+# left = [-screen_width // cols // 2, -screen_height // 2 + 20]
+# right = [screen_width // cols // 2, -screen_height // 2 + 20]
 
 point_x, point_y = [0, -screen_height // 2 + 30]
 
@@ -109,10 +109,10 @@ class Paddle:
         # self.x = (screen_width // 2) - (self.width // 2)
         self.x = self.width // 2
         # self.y = screen_height - (self.height * 2)
-        self.y = screen_height // 2 - self.height * 2
+        self.y = screen_height // 2 - self.height
         self.speed = 10
-        self.rect = (left, right)
-        # self.rect = [[-self.x, -self.y], [self.x, -self.y]]
+        # self.rect = (left, right)
+        self.rect = [[-self.x, -self.y], [self.x, -self.y]]
         self.direction = 0
     
 
@@ -132,7 +132,6 @@ class Ball:
             for block in row:
 
                 if block[0][0][0] < self.rect[0] and self.rect[0] < block[0][3][0]:
-                    # print('-----------------------')
                     # collision from above
                     if abs(self.rect[1] - block[0][1][1]) < collision_thresh and self.speed_y < 0:
                         self.speed_y *= -1
@@ -163,6 +162,8 @@ class Ball:
                 block_count += 1
             row_count += 1
 
+        if len(wall.blocks) == 0:
+            self.game_over = 1
     #     if wall_destroyed == 1:
     #         self.game_over = 1
                     
@@ -176,8 +177,8 @@ class Ball:
         if self.rect[1] < -screen_height // 2:
             self.game_over = -1
 
-        if left[0] < self.rect[0] and self.rect[0] < right[0]:
-            if abs(self.rect[1] - left[1]) < collision_thresh and self.speed_y < 0:
+        if player_paddle.rect[0][0] < self.rect[0] and self.rect[0] < player_paddle.rect[1][0]:
+            if abs(self.rect[1] - player_paddle.rect[0][1]) < collision_thresh and self.speed_y < 0:
                 self.speed_y *= -1
                 self.speed_x += player_paddle.direction
                 if self.speed_x > self.speed_max:
@@ -269,6 +270,9 @@ def display():
     if not liveBall:
         if gameOver == 0:
             drawText(215, screen_height // 2 - 100, 'CLICK SPACE TO START')
+        elif gameOver == 1:
+            drawText(265, screen_height // 2 - 100, 'YOU WIN')
+            drawText(215, screen_height // 2 - 150, 'CLICK SPACE TO START')
         elif gameOver == -1:
             drawText(265, screen_height // 2 - 100, 'YOU LOSE')
             drawText(215, screen_height // 2 - 150, 'CLICK SPACE TO START')
@@ -286,6 +290,9 @@ def keyPressed(key, x, y):
     global pressLeft, pressRight, liveBall
     if key == 32:
         liveBall = True
+        ball.reset(player_paddle.x + (player_paddle.width // 2), player_paddle.y - player_paddle.height)
+        player_paddle.reset()
+        wall.create_wall()
     if key == GLUT_KEY_LEFT:
         pressLeft = True
     if key == GLUT_KEY_RIGHT:
