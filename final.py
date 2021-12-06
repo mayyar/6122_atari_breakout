@@ -1,7 +1,3 @@
-import pygame
-from pygame.locals import *
-import sys
-import glfw
 
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -11,7 +7,6 @@ screen_width, screen_height = 600, 600
 
 cols = 6
 rows = 6
-fps = 60
 
 # Number of the glut window.
 window = 0
@@ -21,14 +16,7 @@ right = [screen_width // cols // 2, -screen_height // 2 + 20]
 
 point_x, point_y = [0, -screen_height // 2 + 30]
 
-# def display_openGL(w, h):
-#   pygame.display.set_mode((w,h), pygame.OPENGL|pygame.DOUBLEBUF)
-#   glViewport(0, 0, screen_width, screen_height)
-#   glClearColor(234.0/255.0, 218.0/255.0, 184.0/255.0, 1.0)
-#   glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-#   glMatrixMode(GL_PROJECTION)
-#   glLoadIdentity(); 
-#   gluOrtho2D(-screen_width/2, screen_width/2, -screen_height/2, screen_height/2)
+pressLeft, pressRight = False, False
 
 class Wall:
     def __init__(self):
@@ -84,23 +72,25 @@ class Wall:
                 glVertex2f(rect[2][0], rect[2][1])
                 glVertex2f(rect[3][0], rect[3][1])
                 glEnd()
-                glFlush()
+                # glFlush()
 
 class Paddle:
     def __init__(self):
         self.reset()
 
-    # def move(self):
-    #     self.direction = 0
-    #     key = pygame.key.get_pressed()
-        # if key[pygame.K_LEFT] and self.rect[0][0] > 0:
-        #     for i in range(4):
-        #         self.rect[i][0] -= self.speed
-        #     self.direction = -1
-        # if key[pygame.K_RIGHT] and self.rect[2][0] < screen_width:
-        #     for i in range(4):
-        #         self.rect[i][0] += self.speed
-        #     self.direction = 1
+    def move(self):
+        self.direction = 0
+        # key = pygame.key.get_pressed()
+        if pressLeft:
+            if self.rect[0][0] > -screen_width // 2:
+                self.rect[0][0] -= self.speed
+                self.rect[1][0] -= self.speed
+                self.direction = -1
+        if pressRight:
+            if self.rect[1][0] < screen_width // 2:
+                self.rect[0][0] += self.speed
+                self.rect[1][0] += self.speed
+                self.direction = 1
     
     def draw(self):
         glColor3f(142.0/255.0, 135.0/255.0, 123.0/255.0)
@@ -109,15 +99,18 @@ class Paddle:
         glVertex2f(self.rect[0][0], self.rect[0][1])
         glVertex2f(self.rect[1][0], self.rect[1][1])
         glEnd()
-        glFlush()
+        # glFlush()
     
     def reset(self):
         self.height = 20
         self.width = screen_width // cols
-        self.x = (screen_width // 2) - (self.width // 2)
-        self.y = screen_height - (self.height * 2)
+        # self.x = (screen_width // 2) - (self.width // 2)
+        self.x = self.width // 2
+        # self.y = screen_height - (self.height * 2)
+        self.y = screen_height // 2 - self.height * 2
         self.speed = 10
         self.rect = (left, right)
+        # self.rect = [[-self.x, -self.y], [self.x, -self.y]]
         self.direction = 0
     
 
@@ -202,15 +195,13 @@ class Ball:
         return self.game_over
 
     def draw(self):
-        # pygame.draw.circle(screen, paddle_col, (self.rect.x + self.ball_rad, self.rect.y + self.ball_rad), self.ball_rad)
-        # pygame.draw.circle(screen, paddle_outline, (self.rect.x + self.ball_rad, self.rect.y + self.ball_rad), self.ball_rad, 3)
         glColor3f(142.0/255.0, 135.0/255.0, 123.0/255.0)
         glPointSize(20)
         glEnable(GL_POINT_SMOOTH)
         glBegin(GL_POINTS)
         glVertex2f(self.rect[0], self.rect[1])
         glEnd()
-        glFlush()
+        # glFlush()
 
     def reset(self, x, y):
         self.ball_rad = 10
@@ -236,43 +227,59 @@ def display():
     
     wall.draw()
 
-    
     player_paddle.draw()
-    
+    player_paddle.move()
+
     ball.draw()
     ball.move()
+
+    glFlush()
+    glutPostRedisplay()
     glutSwapBuffers()
 
 def init():
     glClearColor(234.0/255.0, 218.0/255.0, 184.0/255.0, 1.0)
+    glMatrixMode(GL_PROJECTION)
     gluOrtho2D(-screen_width/2, screen_width/2, -screen_height/2, screen_height/2)
 
 def keyPressed(key, x, y):
-    global window
-	
-    global left, right
-    if key == GLUT_KEY_LEFT and left[0] > -screen_width // 2:
-        left[0] -= 20
-        right[0] -= 20
-    if key == GLUT_KEY_RIGHT and right[0] < screen_width // 2:
-        left[0] += 20
-        right[0] += 20
+    global pressLeft, pressRight
+    
+    if key == GLUT_KEY_LEFT:
+        pressLeft = True
+    if key == GLUT_KEY_RIGHT:
+        pressRight = True
     glutPostRedisplay()
 
-def main():
-
+def keyReleased(key, x, y):
+    global pressLeft, pressRight
     
-    global window
+    if key == GLUT_KEY_LEFT:
+        pressLeft = False
+    if key == GLUT_KEY_RIGHT:
+        pressRight = False
+    glutPostRedisplay()
+
+
+
+
+def main():
+    
+
+    # global window
     glutInit(sys.argv)
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB)
     glutInitWindowSize(screen_width, screen_height)
     window = glutCreateWindow("Breakout")
     init()
     glutDisplayFunc(display)
+    # glutTimerFunc(1000//60, display, 0)
+
     # glutKeyboardFunc(keyPressed)
     glutSpecialFunc(keyPressed)
+    glutSpecialUpFunc(keyReleased)
     glutIdleFunc(display)
-    # glutTimerFunc(1000//60, display, 0)
+    # glutTimerFunc(1000//60, keyPressed, 0)
     glutMainLoop()
 
 if __name__ == "__main__":
