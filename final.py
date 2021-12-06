@@ -19,23 +19,38 @@ class Wall:
     def __init__(self):
         self.width = screen_width // cols
         self.height = 50
+        self.matrix = []
+        with open('level.txt') as f:
+            lines = f.readlines()
+            for line in lines:
+                line_row = []
+                for c in line.split(' '):
+                    line_row.append(int(c))
+                self.matrix.append(line_row)
     
     # create blocks of the breakout game
     def create_wall(self):
         self.blocks = []
         block_individual = []
+        row_count = 0
         for row in range(rows):
             block_row = []
+            block_count = 0
             for col in range(cols):
                 block_x = col * self.width
                 block_y = row * self.height
 
-                if row < 2:
-                    strength = 3
-                elif row < 4:
-                    strength = 2
-                elif row < 6:
-                    strength  = 1
+                # if row < 2:
+                #     strength = 3
+                # elif row < 4:
+                #     strength = 2
+                # elif row < 6:
+                #     strength  = 1
+
+                strength = self.matrix[row_count][block_count]
+                if strength == 0:
+                    block_count += 1
+                    continue
 
                 lower_left = [-screen_width // 2 + (2 * (col + 1)) + block_x, screen_height // 2 - self.height - (2 * (row + 1)) - block_y]
                 higer_left = [-screen_width // 2 + (2 * (col + 1)) + block_x, screen_height // 2 - (2 * (row + 1)) - block_y]
@@ -47,8 +62,10 @@ class Wall:
                 block_individual = [rect, strength, False]
 
                 block_row.append(block_individual)
+                block_count += 1
 
             self.blocks.append(block_row)
+            row_count += 1
 
     # draw the blocks
     def draw(self):
