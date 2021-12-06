@@ -33,7 +33,7 @@ def draw_text(text, font, text_col, x, y):
     img = font.render(text, True, text_col)
     screen.blit(img, (x, y))
 
-class wall:
+class Wall:
     def __init__(self):
         self.width = screen_width // cols
         self.height = 50
@@ -195,7 +195,7 @@ class game_ball:
 
 
 
-wall = wall()
+wall = Wall()
 wall.create_wall()
 
 player_paddle = paddle()

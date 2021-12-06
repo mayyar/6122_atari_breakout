@@ -62,10 +62,10 @@ class Wall:
                 elif row < 6:
                     strength  = 1
 
-                lower_left = (-200 + (2 * (col + 1)) + block_x, 250 - (2 * (row + 1)) - block_y)
-                higer_left = (-200 + (2 * (col + 1)) + block_x, 300 - (2 * (row + 1)) - block_y)
-                higher_right = (-300 + (2 * (col + 1)) + block_x, 300 - (2 * (row + 1)) - block_y)
-                lower_right = (-300 + (2 * (col + 1)) + block_x, 250 - (2 * (row + 1)) - block_y)
+                lower_left = [-300 + (2 * (col + 1)) + block_x, 250 - (2 * (row + 1)) - block_y]
+                higer_left = [-300 + (2 * (col + 1)) + block_x, 300 - (2 * (row + 1)) - block_y]
+                higher_right = [-200 + (2 * (col + 1)) + block_x, 300 - (2 * (row + 1)) - block_y]
+                lower_right = [-200 + (2 * (col + 1)) + block_x, 250 - (2 * (row + 1)) - block_y]
                 
                 rect = [lower_left, higer_left, higher_right, lower_right]
                 
@@ -138,13 +138,28 @@ class Ball:
     
     def move(self):
 
-    #     collision_thresh = 5
-
+        collision_thresh = 5
+        # global wall
     #     wall_destroyed = 1
-    #     row_count = 0
-    #     for row in wall.blocks:
-    #         block_count = 0
-    #         for block in row:
+        # row_count = 0
+        # for row in wall.blocks:
+        #     block_count = 0
+        #     for block in row:
+        #         print(block)
+        #         if block[0][0][0] < self.rect[0] and self.rect[0] < block[0][3][0]:
+        #             # print('-----------------------')
+        #             # collision form above
+        #             if abs(self.rect[1] - block[0][1][1]) < collision_thresh and self.speed_y < 0:
+        #                 self.speed_y *= -1
+        #             # collision form below
+        #             elif abs(self.rect[1] - block[0][0][1]) < collision_thresh and self.speed_y > 0:
+        #                 self.speed_y *= -1
+        #             # collision form left
+        #             elif abs(self.rect[0] - block[0][0][0]) < collision_thresh and self.speed_x > 0:
+        #                 self.speed_x *= -1
+        #             # collision form right
+        #             elif abs(self.rect[0] - block[0][2][0]) < collision_thresh and self.speed_x < 0:
+        #                 self.speed_x *= -1
 
     #             if self.rect.colliderect(block[0]):
     #                 # collision form above
@@ -167,8 +182,8 @@ class Ball:
                 
     #             if wall.blocks[row_count][block_count][0] != (0, 0, 0, 0):
     #                 wall_destroyed = 0
-    #             block_count += 1
-    #         row_count += 1
+                block_count += 1
+            row_count += 1
 
     #     if wall_destroyed == 1:
     #         self.game_over = 1
@@ -183,6 +198,9 @@ class Ball:
         if self.rect[1] < -screen_height // 2:
             self.game_over = -1
 
+        if left[0] < self.rect[0] and self.rect[0] < right[0]:
+            if abs(self.rect[1] - left[1]) < collision_thresh and self.speed_y < 0:
+                self.speed_y *= -1
     #     if self.rect.colliderect(player_paddle):
 
     #         if abs(self.rect.bottom - player_paddle.rect.top) < collision_thresh and self.speed_y > 0:
@@ -198,7 +216,7 @@ class Ball:
         self.rect[0] += self.speed_x
         self.rect[1] += self.speed_y
 
-    #     return self.game_over
+        return self.game_over
 
     def draw(self):
         # pygame.draw.circle(screen, paddle_col, (self.rect.x + self.ball_rad, self.rect.y + self.ball_rad), self.ball_rad)
@@ -222,35 +240,6 @@ class Ball:
         self.speed_max = 5
         self.game_over = 0
 
-# pygame.init()
-
-# pygame.display.set_caption('Breakout')
-
-# display_openGL(screen_width, screen_height)
-
-# wall = Wall()
-# wall.create_wall()
-# wall.draw()
-
-# player_paddle = Paddle()
-# player_paddle.draw()
-
-# pygame.display.flip()
-# run = True
-# while run:
-    
-#     for event in pygame.event.get():
-#         if event.type == QUIT:
-#             run = False
-
-    # wall = Wall()
-    # wall.create_wall()
-    # wall.draw()
-
-    
-    # pygame.display.flip()
-
-# pygame.quit()
 
 wall = Wall()
 wall.create_wall()
@@ -278,9 +267,7 @@ def init():
 
 def keyPressed(key, x, y):
     global window
-	# If escape is pressed, kill everything.
-    if key == ESCAPE:
-        sys.exit()
+	
     global left, right
     if key == b'a' and left[0] > -screen_width // 2:
         left[0] -= 10
@@ -291,6 +278,8 @@ def keyPressed(key, x, y):
     glutPostRedisplay()
 
 def main():
+
+    
     global window
     glutInit(sys.argv)
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB)
