@@ -290,15 +290,6 @@ def keyPressed(key, x, y):
         right[0] += 10
     glutPostRedisplay()
 
-def idle(x):
-    global point_x
-    ball = Ball(point_x, point_y)
-    ball.draw()
-    ball.move()
-    glutPostRedisplay()
-    glutTimerFunc(1000//60, idle, 0)
-    point_x += 1
-
 def main():
     global window
     glutInit(sys.argv)
