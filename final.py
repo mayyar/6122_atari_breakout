@@ -9,28 +9,17 @@ from OpenGL.GLUT import *
 
 screen_width, screen_height = 600, 600
 
-bg = (234, 218, 184)
-
-block_red = (242, 85, 96)
-block_green = (86, 174, 87)
-block_blue = (69, 177, 232)
-
-paddle_col = (142, 135, 123)
-paddle_outline = (100, 100, 100)
-
 cols = 6
 rows = 6
 fps = 60
 
-ESCAPE = b'\x1b'
-
 # Number of the glut window.
 window = 0
 
-left = [-screen_width // cols // 2, -300 + 20]
-right = [screen_width // cols // 2, -300 + 20]
+left = [-screen_width // cols // 2, -screen_height // 2 + 20]
+right = [screen_width // cols // 2, -screen_height // 2 + 20]
 
-point_x, point_y = [0, -300 + 30]
+point_x, point_y = [0, -screen_height // 2 + 30]
 
 # def display_openGL(w, h):
 #   pygame.display.set_mode((w,h), pygame.OPENGL|pygame.DOUBLEBUF)
@@ -62,14 +51,14 @@ class Wall:
                 elif row < 6:
                     strength  = 1
 
-                lower_left = [-300 + (2 * (col + 1)) + block_x, 250 - (2 * (row + 1)) - block_y]
-                higer_left = [-300 + (2 * (col + 1)) + block_x, 300 - (2 * (row + 1)) - block_y]
-                higher_right = [-200 + (2 * (col + 1)) + block_x, 300 - (2 * (row + 1)) - block_y]
-                lower_right = [-200 + (2 * (col + 1)) + block_x, 250 - (2 * (row + 1)) - block_y]
+                lower_left = [-screen_width // 2 + (2 * (col + 1)) + block_x, screen_height // 2 - self.height - (2 * (row + 1)) - block_y]
+                higer_left = [-screen_width // 2 + (2 * (col + 1)) + block_x, screen_height // 2 - (2 * (row + 1)) - block_y]
+                higher_right = [-screen_width // 2 + self.width + (2 * (col + 1)) + block_x, screen_height // 2 - (2 * (row + 1)) - block_y]
+                lower_right = [-screen_width // 2 + self.width + (2 * (col + 1)) + block_x, screen_height // 2 - self.height - (2 * (row + 1)) - block_y]
                 
                 rect = [lower_left, higer_left, higher_right, lower_right]
                 
-                block_individual = [rect, strength]
+                block_individual = [rect, strength, False]
 
                 block_row.append(block_individual)
 
@@ -138,52 +127,46 @@ class Ball:
     
     def move(self):
 
-        collision_thresh = 5
+        collision_thresh = 10
+        hit = False
         # global wall
     #     wall_destroyed = 1
-        # row_count = 0
-        # for row in wall.blocks:
-        #     block_count = 0
-        #     for block in row:
-        #         print(block)
-        #         if block[0][0][0] < self.rect[0] and self.rect[0] < block[0][3][0]:
-        #             # print('-----------------------')
-        #             # collision form above
-        #             if abs(self.rect[1] - block[0][1][1]) < collision_thresh and self.speed_y < 0:
-        #                 self.speed_y *= -1
-        #             # collision form below
-        #             elif abs(self.rect[1] - block[0][0][1]) < collision_thresh and self.speed_y > 0:
-        #                 self.speed_y *= -1
-        #             # collision form left
-        #             elif abs(self.rect[0] - block[0][0][0]) < collision_thresh and self.speed_x > 0:
-        #                 self.speed_x *= -1
-        #             # collision form right
-        #             elif abs(self.rect[0] - block[0][2][0]) < collision_thresh and self.speed_x < 0:
-        #                 self.speed_x *= -1
+        row_count = 0
+        for row in wall.blocks:
+            block_count = 0
+            for block in row:
 
-    #             if self.rect.colliderect(block[0]):
-    #                 # collision form above
-    #                 if abs(self.rect.bottom - block[0].top) < collision_thresh and self.speed_y > 0:
-    #                     self.speed_y *= -1
-    #                 # collision form below
-    #                 if abs(self.rect.top - block[0].bottom) < collision_thresh and self.speed_y < 0:
-    #                     self.speed_y *= -1
-    #                 # collision form left
-    #                 if abs(self.rect.right - block[0].left) < collision_thresh and self.speed_x > 0:
-    #                     self.speed_x *= -1
-    #                 # collision form right
-    #                 if abs(self.rect.left - block[0].right) < collision_thresh and self.speed_x < 0:
-    #                     self.speed_x *= -1
-                    
-    #                 if wall.blocks[row_count][block_count][1] > 1:
-    #                     wall.blocks[row_count][block_count][1] -= 1
-    #                 else:
-    #                     wall.blocks[row_count][block_count][0] = (0, 0, 0, 0)
+                if block[0][0][0] < self.rect[0] and self.rect[0] < block[0][3][0]:
+                    # print('-----------------------')
+                    # collision from above
+                    if abs(self.rect[1] - block[0][1][1]) < collision_thresh and self.speed_y < 0:
+                        self.speed_y *= -1
+                        block[2] = True
+                        
+                    # collision from below
+                    if abs(self.rect[1] - block[0][0][1]) < collision_thresh and self.speed_y > 0:
+                        self.speed_y *= -1
+                        block[2] = True
+                if block[0][0][1] < self.rect[1] and self.rect[1] < block[0][1][1]:
+                    # collision from left
+                    if abs(self.rect[0] - block[0][0][0]) < collision_thresh and self.speed_x > 0:
+                        self.speed_x *= -1
+                        block[2] = True
+                    # collision from right
+                    if abs(self.rect[0] - block[0][2][0]) < collision_thresh and self.speed_x < 0:
+                        self.speed_x *= -1
+                        block[2] = True
+                
+                if wall.blocks[row_count][block_count][1] > 1 and wall.blocks[row_count][block_count][2]:
+                    wall.blocks[row_count][block_count][1] -= 1
+                    wall.blocks[row_count][block_count][2] = False
+                elif wall.blocks[row_count][block_count][1] == 1 and wall.blocks[row_count][block_count][2]:
+                    del wall.blocks[row_count][block_count]
                 
     #             if wall.blocks[row_count][block_count][0] != (0, 0, 0, 0):
     #                 wall_destroyed = 0
-            #     block_count += 1
-            # row_count += 1
+                block_count += 1
+            row_count += 1
 
     #     if wall_destroyed == 1:
     #         self.game_over = 1
@@ -258,7 +241,6 @@ def display():
     
     ball.draw()
     ball.move()
-    # glutPostRedisplay()
     glutSwapBuffers()
 
 def init():
@@ -269,12 +251,12 @@ def keyPressed(key, x, y):
     global window
 	
     global left, right
-    if key == b'a' and left[0] > -screen_width // 2:
-        left[0] -= 10
-        right[0] -= 10
-    if key == b'd' and right[0] < screen_width // 2:
-        left[0] += 10
-        right[0] += 10
+    if key == GLUT_KEY_LEFT and left[0] > -screen_width // 2:
+        left[0] -= 20
+        right[0] -= 20
+    if key == GLUT_KEY_RIGHT and right[0] < screen_width // 2:
+        left[0] += 20
+        right[0] += 20
     glutPostRedisplay()
 
 def main():
@@ -287,7 +269,8 @@ def main():
     window = glutCreateWindow("Breakout")
     init()
     glutDisplayFunc(display)
-    glutKeyboardFunc(keyPressed)
+    # glutKeyboardFunc(keyPressed)
+    glutSpecialFunc(keyPressed)
     glutIdleFunc(display)
     # glutTimerFunc(1000//60, display, 0)
     glutMainLoop()
