@@ -182,8 +182,8 @@ class Ball:
                 
     #             if wall.blocks[row_count][block_count][0] != (0, 0, 0, 0):
     #                 wall_destroyed = 0
-                block_count += 1
-            row_count += 1
+            #     block_count += 1
+            # row_count += 1
 
     #     if wall_destroyed == 1:
     #         self.game_over = 1
