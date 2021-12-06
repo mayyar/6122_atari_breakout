@@ -18,6 +18,7 @@ point_x, point_y = [0, -screen_height // 2 + 30]
 
 pressLeft, pressRight = False, False
 liveBall = False
+gameOver = 0
 
 class Wall:
     def __init__(self):
@@ -124,7 +125,7 @@ class Ball:
         collision_thresh = 10
         hit = False
         # global wall
-    #     wall_destroyed = 1
+        # wall_destroyed = 0
         row_count = 0
         for row in wall.blocks:
             block_count = 0
@@ -179,6 +180,11 @@ class Ball:
             if abs(self.rect[1] - left[1]) < collision_thresh and self.speed_y < 0:
                 self.speed_y *= -1
                 self.speed_x += player_paddle.direction
+                if self.speed_x > self.speed_max:
+                    self.speed_x = self.speed_max
+                elif self.speed_x < 0 and self.speed_x < -self.speed_max:
+                    self.speed_x = - self.speed_max
+                    
     #     if self.rect.colliderect(player_paddle):
 
     #         if abs(self.rect.bottom - player_paddle.rect.top) < collision_thresh and self.speed_y > 0:
@@ -216,6 +222,27 @@ class Ball:
         self.speed_max = 5
         self.game_over = 0
 
+def drawText(x, y, s):
+    glMatrixMode(GL_PROJECTION)
+    glPushMatrix()
+    glLoadIdentity()
+    gluOrtho2D(0.0, screen_width, 0.0, screen_height)
+
+    glMatrixMode(GL_MODELVIEW)
+    glPushMatrix()
+    glLoadIdentity()
+    glColor3f(78.0 // 255.0, 81.0 // 255.0, 139.0 // 255.0)
+    glRasterPos2i(x, y)
+
+    # s = "Respect mah authoritah!"
+    font = GLUT_BITMAP_9_BY_15
+    for c in s:
+        glutBitmapCharacter(font, ord(c))
+    glMatrixMode(GL_MODELVIEW)
+    glPopMatrix()
+
+    glMatrixMode(GL_PROJECTION)
+    glPopMatrix()
 
 wall = Wall()
 wall.create_wall()
@@ -225,9 +252,9 @@ player_paddle = Paddle()
 ball = Ball(point_x, point_y)
 
 def display():
+    global gameOver, liveBall
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     
-
     #draw all objects
     wall.draw()
     player_paddle.draw()
@@ -235,7 +262,16 @@ def display():
 
     if liveBall:
         player_paddle.move()
-        ball.move()
+        gameOver = ball.move()
+        if gameOver != 0:
+            liveBall = False
+
+    if not liveBall:
+        if gameOver == 0:
+            drawText(215, screen_height // 2 - 100, 'CLICK SPACE TO START')
+        elif gameOver == -1:
+            drawText(265, screen_height // 2 - 100, 'YOU LOSE')
+            drawText(215, screen_height // 2 - 150, 'CLICK SPACE TO START')
 
     glFlush()
     glutPostRedisplay()
@@ -265,9 +301,6 @@ def keyReleased(key, x, y):
         pressRight = False
     glutPostRedisplay()
 
-
-
-
 def main():
     
     # global window
@@ -277,13 +310,10 @@ def main():
     window = glutCreateWindow("Breakout")
     init()
     glutDisplayFunc(display)
-    # glutTimerFunc(1000//60, display, 0)
 
-    # glutKeyboardFunc(keyPressed)
     glutSpecialFunc(keyPressed)
     glutSpecialUpFunc(keyReleased)
     glutIdleFunc(display)
-    # glutTimerFunc(1000//60, keyPressed, 0)
     glutMainLoop()
 
 if __name__ == "__main__":
