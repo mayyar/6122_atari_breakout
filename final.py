@@ -17,6 +17,7 @@ right = [screen_width // cols // 2, -screen_height // 2 + 20]
 point_x, point_y = [0, -screen_height // 2 + 30]
 
 pressLeft, pressRight = False, False
+liveBall = False
 
 class Wall:
     def __init__(self):
@@ -177,6 +178,7 @@ class Ball:
         if left[0] < self.rect[0] and self.rect[0] < right[0]:
             if abs(self.rect[1] - left[1]) < collision_thresh and self.speed_y < 0:
                 self.speed_y *= -1
+                self.speed_x += player_paddle.direction
     #     if self.rect.colliderect(player_paddle):
 
     #         if abs(self.rect.bottom - player_paddle.rect.top) < collision_thresh and self.speed_y > 0:
@@ -225,13 +227,15 @@ ball = Ball(point_x, point_y)
 def display():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     
+
+    #draw all objects
     wall.draw()
-
     player_paddle.draw()
-    player_paddle.move()
-
     ball.draw()
-    ball.move()
+
+    if liveBall:
+        player_paddle.move()
+        ball.move()
 
     glFlush()
     glutPostRedisplay()
@@ -243,8 +247,9 @@ def init():
     gluOrtho2D(-screen_width/2, screen_width/2, -screen_height/2, screen_height/2)
 
 def keyPressed(key, x, y):
-    global pressLeft, pressRight
-    
+    global pressLeft, pressRight, liveBall
+    if key == 32:
+        liveBall = True
     if key == GLUT_KEY_LEFT:
         pressLeft = True
     if key == GLUT_KEY_RIGHT:
@@ -265,7 +270,6 @@ def keyReleased(key, x, y):
 
 def main():
     
-
     # global window
     glutInit(sys.argv)
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB)
