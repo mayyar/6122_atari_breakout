@@ -178,9 +178,9 @@ class Ball:
         if self.rect[0] < -screen_width // 2 or self.rect[0] > screen_width // 2:
             self.speed_x *= -1
         
-        if self.rect[1] < screen_height // 2:
+        if self.rect[1] > screen_height // 2:
             self.speed_y *= -1
-        if self.rect[1] > screen_height:
+        if self.rect[1] < -screen_height // 2:
             self.game_over = -1
 
     #     if self.rect.colliderect(player_paddle):
@@ -218,7 +218,7 @@ class Ball:
         # self.rect = pygame.Rect(self.x, self.y, self.ball_rad * 2, self.ball_rad * 2)
         self.rect = [point_x, point_y]
         self.speed_x = 4
-        self.speed_y = -4
+        self.speed_y = 4
         self.speed_max = 5
         self.game_over = 0
 
@@ -252,17 +252,23 @@ class Ball:
 
 # pygame.quit()
 
+wall = Wall()
+wall.create_wall()
+
+player_paddle = Paddle()
+
+ball = Ball(point_x, point_y)
+
 def display():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    wall = Wall()
-    wall.create_wall()
+    
     wall.draw()
 
-    player_paddle = Paddle()
+    
     player_paddle.draw()
-    # ball = Ball(point_x, point_y)
-    # ball.draw()
-    # ball.move()
+    
+    ball.draw()
+    ball.move()
     # glutPostRedisplay()
     glutSwapBuffers()
 
@@ -302,8 +308,8 @@ def main():
     init()
     glutDisplayFunc(display)
     glutKeyboardFunc(keyPressed)
-    # glutIdleFunc(idle)
-    glutTimerFunc(1000//60, idle, 0)
+    glutIdleFunc(display)
+    # glutTimerFunc(1000//60, display, 0)
     glutMainLoop()
 
 if __name__ == "__main__":
