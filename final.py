@@ -1,7 +1,7 @@
-
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
+import time
 
 screen_width, screen_height = 600, 600
 
@@ -11,12 +11,23 @@ rows = 6
 # ball position
 point_x, point_y = [0, -screen_height // 2 + 30]
 
+prolongPaddle = False
+accBallSpeed = False
+shortenPaddle = False
+
+gamingFlag = False
+
 pressLeft, pressRight = False, False
+
 liveBall = False
+oneTimeFlag = True
 gameOver = 0
 
 class Wall:
     def __init__(self):
+        '''
+        special function: 1. prolong, 2. shorten, 3. accelerate, 4. two balls 
+        '''
         self.width = screen_width // cols
         self.height = 50
         self.matrix = []
@@ -32,24 +43,17 @@ class Wall:
     def create_wall(self):
         self.blocks = []
         block_individual = []
-        row_count = 0
+
         for row in range(rows):
             block_row = []
-            block_count = 0
             for col in range(cols):
                 block_x = col * self.width
                 block_y = row * self.height
 
-                # if row < 2:
-                #     strength = 3
-                # elif row < 4:
-                #     strength = 2
-                # elif row < 6:
-                #     strength  = 1
-
-                strength = self.matrix[row_count][block_count]
+                strength = self.matrix[row][col] // 10
+                special = self.matrix[row][col] % 10
                 if strength == 0:
-                    block_count += 1
+                    col += 1
                     continue
 
                 lower_left = [-screen_width // 2 + (2 * (col + 1)) + block_x, screen_height // 2 - self.height - (2 * (row + 1)) - block_y]
@@ -59,19 +63,19 @@ class Wall:
                 
                 rect = [lower_left, higer_left, higher_right, lower_right]
                 
-                block_individual = [rect, strength, False]
+                block_individual = [rect, strength, False, special] # x y position, strength, hit or not, special function
 
                 block_row.append(block_individual)
-                block_count += 1
 
             self.blocks.append(block_row)
-            row_count += 1
 
     # draw the blocks
     def draw(self):
         for row in self.blocks:
             for block in row:
-                if block[1] == 3:
+                if block[3] != 0:
+                    glColor3f(1.0, 1.0, 0.0)
+                elif block[1] == 3:
                     # block_blue
                     glColor3f(69.0/255.0, 177.0/255.0, 232.0/255.0)
                 elif block[1] == 2:
@@ -116,6 +120,9 @@ class Paddle:
         glVertex2f(self.rect[1][0], self.rect[1][1])
         glEnd()
     
+    # def special(self):
+    #     self.rect = [[-self.x - 100, -self.y], [self.x + 100, -self.y]]
+
     # initialize/reset the paddle
     def reset(self):
         self.height = 20
@@ -133,7 +140,8 @@ class Ball:
     
     # ball movement
     def move(self):
-
+        global prolongPaddle, accBallSpeed, shortenPaddle, phitTime, ahitTime, shitTime
+        
         # detect the collision distance
         collision_thresh = 10
         
@@ -147,22 +155,61 @@ class Ball:
                     if abs(self.rect[1] - block[0][1][1]) < collision_thresh and self.speed_y < 0:
                         self.speed_y *= -1
                         block[2] = True
-                        
+
+                        if block[3] == 1:
+                            phitTime = time.time()
+                            prolongPaddle = True
+                        elif block[3] == 2:
+                            shitTime = time.time()
+                            shortenPaddle = True
+                        elif block[3] == 3:
+                            ahitTime = time.time()
+                            accBallSpeed = True
+
                     # collision from below
                     if abs(self.rect[1] - block[0][0][1]) < collision_thresh and self.speed_y > 0:
                         self.speed_y *= -1
                         block[2] = True
+
+                        if block[3] == 1:
+                            phitTime = time.time()
+                            prolongPaddle = True
+                        elif block[3] == 2:
+                            shitTime = time.time()
+                            shortenPaddle = True
+                        elif block[3] == 3:
+                            ahitTime = time.time()
+                            accBallSpeed = True
 
                 if block[0][0][1] < self.rect[1] and self.rect[1] < block[0][1][1]:
                     # collision from left
                     if abs(self.rect[0] - block[0][0][0]) < collision_thresh and self.speed_x > 0:
                         self.speed_x *= -1
                         block[2] = True
+                        if block[3] == 1:
+                            phitTime = time.time()
+                            prolongPaddle = True
+                        elif block[3] == 2:
+                            shitTime = time.time()
+                            shortenPaddle = True
+                        elif block[3] == 3:
+                            ahitTime = time.time()
+                            accBallSpeed = True
+
                     # collision from right
                     if abs(self.rect[0] - block[0][2][0]) < collision_thresh and self.speed_x < 0:
                         self.speed_x *= -1
                         block[2] = True
-
+                        if block[3] == 1:
+                            phitTime = time.time()
+                            prolongPaddle = True
+                        elif block[3] == 2:
+                            shitTime = time.time()
+                            shortenPaddle = True
+                        elif block[3] == 3:
+                            ahitTime = time.time()
+                            accBallSpeed = True
+                
                 # if collision with block, make it downgraded or diappeared
                 if wall.blocks[row_count][block_count][1] > 1 and wall.blocks[row_count][block_count][2]:
                     wall.blocks[row_count][block_count][1] -= 1
@@ -254,15 +301,62 @@ player_paddle = Paddle()
 
 ball = Ball(point_x, point_y)
 
+
+# deltaTime = 0.0
+
 # display the screen content
 def display():
+    # global lastFrame
+    # currentFrame = glutGet(GLUT_ELAPSED_TIME)
+    # deltaTime = currentFrame - lastFrame
+    # lastFrame = currentFrame
+
     global gameOver, liveBall
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     
+
     #draw all objects
     wall.draw()
     player_paddle.draw()
     ball.draw()
+    
+    global oneTimeFlag, prolongPaddle, accBallSpeed, shortenPaddle, gamingFlag
+    if prolongPaddle:
+        if int(time.time() - phitTime) < 5:
+            if oneTimeFlag:
+                player_paddle.rect[0][0] = player_paddle.rect[0][0] - 50
+                player_paddle.rect[1][0] = player_paddle.rect[1][0] + 50
+                oneTimeFlag = False
+        else:
+            player_paddle.rect[0][0] = player_paddle.rect[0][0] + 50
+            player_paddle.rect[1][0] = player_paddle.rect[1][0] - 50
+            oneTimeFlag = True
+            prolongPaddle = False
+    
+    if shortenPaddle:
+        if int(time.time() - shitTime) < 5:
+            if oneTimeFlag:
+                player_paddle.rect[0][0] = player_paddle.rect[0][0] + 20
+                player_paddle.rect[1][0] = player_paddle.rect[1][0] - 20
+                oneTimeFlag = False
+        else:
+            player_paddle.rect[0][0] = player_paddle.rect[0][0] - 20
+            player_paddle.rect[1][0] = player_paddle.rect[1][0] + 20
+            oneTimeFlag = True
+            shortenPaddle = False
+    
+    if accBallSpeed:
+        if int(time.time() - ahitTime) < 5:
+            if oneTimeFlag:
+                ball.speed_x *= 2
+                ball.speed_y *= 2
+                oneTimeFlag = False
+        else:
+            ball.speed_x //= 2
+            ball.speed_y //= 2
+            oneTimeFlag = True
+            accBallSpeed = False
+
 
     if liveBall:
         player_paddle.move()
@@ -279,6 +373,7 @@ def display():
         elif gameOver == -1:
             drawText(265, screen_height // 2 - 100, 'YOU LOSE')
             drawText(215, screen_height // 2 - 150, 'CLICK SPACE TO START')
+        gamingFlag = False
 
     glFlush()
     glutPostRedisplay()
@@ -290,14 +385,17 @@ def init():
     gluOrtho2D(-screen_width/2, screen_width/2, -screen_height/2, screen_height/2)
 
 def keyPressed(key, x, y):
-    global pressLeft, pressRight, liveBall
+    global pressLeft, pressRight, liveBall, gamingFlag
 
     # SPACE: start/restart the game
     if key == 32:
-        liveBall = True
-        ball.reset(player_paddle.x + (player_paddle.width // 2), player_paddle.y - player_paddle.height)
-        player_paddle.reset()
-        wall.create_wall()
+        if not gamingFlag:
+            liveBall = True
+            ball.reset(player_paddle.x + (player_paddle.width // 2), player_paddle.y - player_paddle.height)
+            player_paddle.reset()
+            wall.create_wall()
+            gamingFlag = True
+
 
     if key == GLUT_KEY_LEFT:
         pressLeft = True
@@ -316,6 +414,7 @@ def keyReleased(key, x, y):
     if key == GLUT_KEY_RIGHT:
         pressRight = False
     glutPostRedisplay()
+
 
 def main():
 
