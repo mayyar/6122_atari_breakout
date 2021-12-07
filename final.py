@@ -2,6 +2,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import time
+import threading
 
 screen_width, screen_height = 600, 600
 
@@ -29,10 +30,11 @@ gameOver1 = 0
 class Wall:
     def __init__(self):
         '''
-        special function: 1. prolong, 2. shorten, 3. accelerate, 4. two balls 
+        special function: 
+        1. prolong, 2. shorten, 3. accelerate, 4. two balls 
         '''
         self.width = screen_width // cols
-        self.height = 50
+        self.height = 30
         self.matrix = []
         with open('level.txt') as f:
             lines = f.readlines()
@@ -59,10 +61,10 @@ class Wall:
                     col += 1
                     continue
 
-                lower_left = [-screen_width // 2 + (2 * (col + 1)) + block_x, screen_height // 2 - self.height - (2 * (row + 1)) - block_y]
-                higer_left = [-screen_width // 2 + (2 * (col + 1)) + block_x, screen_height // 2 - (2 * (row + 1)) - block_y]
-                higher_right = [-screen_width // 2 + self.width + (2 * (col + 1)) + block_x, screen_height // 2 - (2 * (row + 1)) - block_y]
-                lower_right = [-screen_width // 2 + self.width + (2 * (col + 1)) + block_x, screen_height // 2 - self.height - (2 * (row + 1)) - block_y]
+                lower_left = [-screen_width // 2 + (5 * (col + 1)) + block_x, screen_height // 2 - self.height - (5 * (row + 1)) - block_y]
+                higer_left = [-screen_width // 2 + (5 * (col + 1)) + block_x, screen_height // 2 - (5 * (row + 1)) - block_y]
+                higher_right = [-screen_width // 2 + self.width + (5 * (col + 1)) + block_x, screen_height // 2 - (5 * (row + 1)) - block_y]
+                lower_right = [-screen_width // 2 + self.width + (5 * (col + 1)) + block_x, screen_height // 2 - self.height - (5 * (row + 1)) - block_y]
                 
                 rect = [lower_left, higer_left, higher_right, lower_right]
                 
@@ -116,7 +118,8 @@ class Paddle:
 
     # draw the paddle
     def draw(self):
-        glColor3f(142.0/255.0, 135.0/255.0, 123.0/255.0)
+        # glColor3f(142.0/255.0, 135.0/255.0, 123.0/255.0)
+        glColor3f(1.0, 1.0, 1.0)
         glLineWidth(20)
         glBegin(GL_LINES)
         glVertex2f(self.rect[0][0], self.rect[0][1])
@@ -264,7 +267,8 @@ class Ball:
 
     # Draw the ball
     def draw(self):
-        glColor3f(142.0/255.0, 135.0/255.0, 123.0/255.0)
+        # glColor3f(142.0/255.0, 135.0/255.0, 123.0/255.0)
+        glColor3f(1.0, 1.0, 1.0)
         glPointSize(20)
         glEnable(GL_POINT_SMOOTH)
         glBegin(GL_POINTS)
@@ -293,7 +297,8 @@ def drawText(x, y, s):
     glMatrixMode(GL_MODELVIEW)
     glPushMatrix()
     glLoadIdentity()
-    glColor3f(78.0 // 255.0, 81.0 // 255.0, 139.0 // 255.0)
+    # glColor3f(78.0 // 255.0, 81.0 // 255.0, 139.0 // 255.0)
+    glColor3f(1.0, 1.0, 139.0 // 255.0)
     glRasterPos2i(x, y)
 
     font = GLUT_BITMAP_9_BY_15
@@ -394,7 +399,8 @@ def display():
     glutSwapBuffers()
 
 def init():
-    glClearColor(234.0/255.0, 218.0/255.0, 184.0/255.0, 1.0)
+    # glClearColor(234.0/255.0, 218.0/255.0, 184.0/255.0, 1.0)
+    glClearColor(0.0, 0.0, 0.0, 1.0)
     glMatrixMode(GL_PROJECTION)
     gluOrtho2D(-screen_width/2, screen_width/2, -screen_height/2, screen_height/2)
 
