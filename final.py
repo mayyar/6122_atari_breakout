@@ -142,7 +142,9 @@ class Paddle:
 
 class Ball:
     def __init__(self, x, y):
-        self.reset(x, y)
+        t = threading.Thread(target=self.reset, args=(x, y))
+        t.start()
+        # self.reset(x, y)
     
     # ball movement
     def move(self):
@@ -310,6 +312,8 @@ def drawText(x, y, s):
     glMatrixMode(GL_PROJECTION)
     glPopMatrix()
 
+
+
 wall = Wall()
 wall.create_wall()
 
@@ -380,7 +384,9 @@ def display():
         if doubleBall:
             ball2.draw()
             gameOver1 = ball2.move()
-        if gameOver != 0 and gameOver1 != 0:
+            if gameOver != 0 and gameOver1 != 0:
+                liveBall = False
+        if not doubleBall and gameOver != 0:
             liveBall = False
 
     if not liveBall:
@@ -405,7 +411,7 @@ def init():
     gluOrtho2D(-screen_width/2, screen_width/2, -screen_height/2, screen_height/2)
 
 def keyPressed(key, x, y):
-    global pressLeft, pressRight, liveBall, gamingFlag
+    global pressLeft, pressRight, liveBall, gamingFlag, doubleBall
 
     # SPACE: start/restart the game
     if key == 32:
@@ -417,6 +423,7 @@ def keyPressed(key, x, y):
             player_paddle.reset()
             wall.create_wall()
             gamingFlag = True
+            doubleBall = False
 
 
     if key == GLUT_KEY_LEFT:
