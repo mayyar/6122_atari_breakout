@@ -14,6 +14,8 @@ point_x, point_y = [0, -screen_height // 2 + 30]
 prolongPaddle = False
 accBallSpeed = False
 shortenPaddle = False
+doubleBall = False
+
 
 gamingFlag = False
 
@@ -22,6 +24,7 @@ pressLeft, pressRight = False, False
 liveBall = False
 oneTimeFlag = True
 gameOver = 0
+gameOver1 = 0
 
 class Wall:
     def __init__(self):
@@ -140,7 +143,7 @@ class Ball:
     
     # ball movement
     def move(self):
-        global prolongPaddle, accBallSpeed, shortenPaddle, phitTime, ahitTime, shitTime
+        global prolongPaddle, accBallSpeed, shortenPaddle, doubleBall, phitTime, ahitTime, shitTime
         
         # detect the collision distance
         collision_thresh = 10
@@ -165,6 +168,8 @@ class Ball:
                         elif block[3] == 3:
                             ahitTime = time.time()
                             accBallSpeed = True
+                        elif block[3] == 4:
+                            doubleBall = True
 
                     # collision from below
                     if abs(self.rect[1] - block[0][0][1]) < collision_thresh and self.speed_y > 0:
@@ -180,6 +185,8 @@ class Ball:
                         elif block[3] == 3:
                             ahitTime = time.time()
                             accBallSpeed = True
+                        elif block[3] == 4:
+                            doubleBall = True
 
                 if block[0][0][1] < self.rect[1] and self.rect[1] < block[0][1][1]:
                     # collision from left
@@ -195,6 +202,8 @@ class Ball:
                         elif block[3] == 3:
                             ahitTime = time.time()
                             accBallSpeed = True
+                        elif block[3] == 4:
+                            doubleBall = True
 
                     # collision from right
                     if abs(self.rect[0] - block[0][2][0]) < collision_thresh and self.speed_x < 0:
@@ -209,6 +218,8 @@ class Ball:
                         elif block[3] == 3:
                             ahitTime = time.time()
                             accBallSpeed = True
+                        elif block[3] == 4:
+                            doubleBall = True
                 
                 # if collision with block, make it downgraded or diappeared
                 if wall.blocks[row_count][block_count][1] > 1 and wall.blocks[row_count][block_count][2]:
@@ -300,7 +311,7 @@ wall.create_wall()
 player_paddle = Paddle()
 
 ball = Ball(point_x, point_y)
-
+ball2 = Ball(point_x, point_y)
 
 # deltaTime = 0.0
 
@@ -311,7 +322,7 @@ def display():
     # deltaTime = currentFrame - lastFrame
     # lastFrame = currentFrame
 
-    global gameOver, liveBall
+    global gameOver, gameOver1, liveBall, doubleBall
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     
 
@@ -361,7 +372,10 @@ def display():
     if liveBall:
         player_paddle.move()
         gameOver = ball.move()
-        if gameOver != 0:
+        if doubleBall:
+            ball2.draw()
+            gameOver1 = ball2.move()
+        if gameOver != 0 and gameOver1 != 0:
             liveBall = False
 
     if not liveBall:
@@ -392,6 +406,8 @@ def keyPressed(key, x, y):
         if not gamingFlag:
             liveBall = True
             ball.reset(player_paddle.x + (player_paddle.width // 2), player_paddle.y - player_paddle.height)
+            ball2.reset(player_paddle.x + (player_paddle.width // 2),
+                    player_paddle.y - player_paddle.height)
             player_paddle.reset()
             wall.create_wall()
             gamingFlag = True
