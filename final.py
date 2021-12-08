@@ -25,16 +25,17 @@ rows = 6
 # ball position
 point_x, point_y = [0, -screen_height // 2 + 30]
 
+# control flag
 prolongPaddle = False
 accBallSpeed = False
 shortenPaddle = False
 doubleBall = False
 waitTocontinue = True
 gamingFlag = False
-
-
 liveBall = False
 oneTimeFlag = True
+
+# game over control
 gameOver = 0
 gameOver1 = 0
     
