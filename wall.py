@@ -14,7 +14,7 @@ class Wall:
         special function: 
         1. prolong, 2. shorten, 3. accelerate, 4. two balls 
         '''
-        self.width = screen_width // cols
+        self.width = screen_width // cols - 6
         self.height = 30
         
         

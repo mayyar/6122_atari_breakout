@@ -337,16 +337,16 @@ def display():
             gamingFlag = False
         elif gameOver == 1:
             drawText(265, screen_height // 2 - 100, 'YOU WIN')
-            if int(time.time() - stopTime) < 3:
-                drawText(190, screen_height // 2 - 150, 'WAIT 3 SECONDS FOR RESTART') 
+            if int(time.time() - stopTime) < 5:
+                drawText(190, screen_height // 2 - 150, 'WAIT 5 SECONDS FOR RESTART') 
                 gamingFlag = True
             else:
                 drawText(215, screen_height // 2 - 150, 'CLICK SPACE TO START')
                 gamingFlag = False
         elif gameOver == -1:
             drawText(265, screen_height // 2 - 100, 'YOU LOSE')
-            if int(time.time() - stopTime) < 3:
-                drawText(190, screen_height // 2 - 150, 'WAIT 3 SECONDS FOR RESTART') 
+            if int(time.time() - stopTime) < 5:
+                drawText(190, screen_height // 2 - 150, 'WAIT 5 SECONDS FOR RESTART') 
                 gamingFlag = True  
             else:
                 drawText(215, screen_height // 2 - 150, 'CLICK SPACE TO START')
