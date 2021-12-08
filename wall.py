@@ -1,7 +1,6 @@
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
-import random
 
 screen_width, screen_height = 600, 600
 

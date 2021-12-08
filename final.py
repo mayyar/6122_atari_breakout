@@ -5,7 +5,8 @@ Last Date Modified: Dec, 7 2021
  
 Description: 
     Developing a breakout game with multi-thread and OpenGL in python
-
+    Games Special Function: 
+        1. prolong the paddle, 2. shorten the paddle, 3. accelerate the ball movement, 4. two balls
 '''
 
 from OpenGL.GL import *
@@ -175,14 +176,12 @@ class Ball:
 
     # Draw the ball
     def draw(self):
-        # glColor3f(142.0/255.0, 135.0/255.0, 123.0/255.0)
         glColor3f(1.0, 1.0, 1.0)
         glPointSize(20)
         glEnable(GL_POINT_SMOOTH)
         glBegin(GL_POINTS)
         glVertex2f(self.rect[0], self.rect[1])
         glEnd()
-        # glFlush()
 
     # initialize/reset the ball
     def reset(self, x, y):
@@ -205,7 +204,6 @@ def drawText(x, y, s):
     glMatrixMode(GL_MODELVIEW)
     glPushMatrix()
     glLoadIdentity()
-    # glColor3f(78.0 // 255.0, 81.0 // 255.0, 139.0 // 255.0)
     glColor3f(1.0, 1.0, 139.0 // 255.0)
     glRasterPos2i(x, y)
 
@@ -234,10 +232,6 @@ deltaTime = 0.0
 
 # display the screen content
 def display():
-    # global lastFrame
-    # currentFrame = glutGet(GLUT_ELAPSED_TIME)
-    # deltaTime = currentFrame - lastFrame
-    # lastFrame = currentFrame
 
     global gameOver, gameOver1, liveBall, doubleBall
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -251,6 +245,7 @@ def display():
     global oneTimeFlag, prolongPaddle, accBallSpeed, shortenPaddle, gamingFlag, stopTime, waitTocontinue, deltaTime
     global functionFlag1, functionFlag2, functionFlag3
 
+    # Special Function: prolong the paddle
     if prolongPaddle:
         if functionFlag1:
             deltaTime = time.time()
@@ -269,7 +264,8 @@ def display():
             player_paddle.rect[1][0] = player_paddle.rect[1][0] - 50
             oneTimeFlag = True
             prolongPaddle = False
-    
+
+    # Special Function: shorten the paddle
     if shortenPaddle:
         if functionFlag2:
             deltaTime = time.time()
@@ -289,6 +285,7 @@ def display():
             oneTimeFlag = True
             shortenPaddle = False
     
+    # Special Function: accelerate the ball movement
     if accBallSpeed:
         if functionFlag3:
             deltaTime = time.time()
@@ -308,7 +305,7 @@ def display():
             oneTimeFlag = True
             accBallSpeed = False
 
-
+    # Ball lived
     if liveBall:
         player_paddle.move()
         gameOver = ball.move()
@@ -320,6 +317,7 @@ def display():
         if not doubleBall and gameOver != 0:
             liveBall = False
 
+    # GameOver
     if not liveBall:
         if waitTocontinue:
             stopTime = time.time()
@@ -349,12 +347,13 @@ def display():
     glutSwapBuffers()
 
 def init():
-    # glClearColor(234.0/255.0, 218.0/255.0, 184.0/255.0, 1.0)
+    # initialize the screen capture
     glClearColor(0.0, 0.0, 0.0, 1.0)
     glMatrixMode(GL_PROJECTION)
     gluOrtho2D(-screen_width/2, screen_width/2, -screen_height/2, screen_height/2)
 
 def keyPressed(key, x, y):
+    # action of pressing key
     global liveBall, gamingFlag, doubleBall, waitTocontinue, level
     global functionFlag1, functionFlag2, functionFlag3
 
@@ -372,6 +371,7 @@ def keyPressed(key, x, y):
             if level == 5:
                 level = 0
 
+            # different level Breakout Game
             if level == 0:
                 gameLevel = 'level1.txt'
             elif level == 1:
@@ -402,7 +402,7 @@ def keyPressed(key, x, y):
     glutPostRedisplay()
 
 def keyReleased(key, x, y):
-    # global pressLeft, pressRight
+    # action of releasing key
     
     if key == GLUT_KEY_LEFT:
         player_paddle.pressLeft = False
