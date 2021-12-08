@@ -38,7 +38,6 @@ oneTimeFlag = True
 functionFlag1 = True
 functionFlag2 = True
 functionFlag3 = True
-functionFlag4 = True
 
 # game over control
 gameOver = 0
@@ -250,7 +249,7 @@ def display():
     ball.draw()
     
     global oneTimeFlag, prolongPaddle, accBallSpeed, shortenPaddle, gamingFlag, stopTime, waitTocontinue, deltaTime
-    global functionFlag1, functionFlag2, functionFlag3, functionFlag4
+    global functionFlag1, functionFlag2, functionFlag3
 
     if prolongPaddle:
         if functionFlag1:
@@ -314,13 +313,6 @@ def display():
         player_paddle.move()
         gameOver = ball.move()
         if doubleBall:
-            if functionFlag4:
-                deltaTime = time.time()
-                functionFlag4 = False
-
-            if int(time.time() - deltaTime) < 0.8:
-                drawText(265, screen_height // 2 - 50, 'Double Ball !')
-
             ball2.draw()
             gameOver1 = ball2.move()
             if gameOver != 0 and gameOver1 != 0:
@@ -364,7 +356,7 @@ def init():
 
 def keyPressed(key, x, y):
     global liveBall, gamingFlag, doubleBall, waitTocontinue, level
-    global functionFlag1, functionFlag2, functionFlag3, functionFlag4
+    global functionFlag1, functionFlag2, functionFlag3
 
 
     # SPACE: start/restart the game
@@ -377,7 +369,7 @@ def keyPressed(key, x, y):
             player_paddle.reset()
 
             level += 1
-            if level == 4:
+            if level == 5:
                 level = 0
 
             if level == 0:
@@ -388,6 +380,8 @@ def keyPressed(key, x, y):
                 gameLevel = 'level3.txt'
             elif level == 3:
                 gameLevel = 'level4.txt'
+            elif level == 4:
+                gameLevel = 'level5.txt'
 
             print(level, gameLevel)
             wall.create_wall(gameLevel)
@@ -397,7 +391,6 @@ def keyPressed(key, x, y):
             functionFlag1 = True
             functionFlag2 = True
             functionFlag3 = True
-            functionFlag4 = True
 
 
     if key == GLUT_KEY_LEFT:
