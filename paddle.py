@@ -4,8 +4,6 @@ from OpenGL.GLUT import *
 
 screen_width, screen_height = 600, 600
 
-# pressLeft, pressRight = False, False
-
 cols = 6
 rows = 6
 

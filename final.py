@@ -1,3 +1,13 @@
+'''
+Author: Szu-Yung Huang, Jyun-Yan Lu
+Class: ECE6122 
+Last Date Modified: Dec, 7 2021 
+ 
+Description: 
+    Developing a breakout game with multi-thread and OpenGL in python
+
+'''
+
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
@@ -5,6 +15,7 @@ import time
 import threading
 from wall import *
 from paddle import *
+from ball import *
 
 screen_width, screen_height = 600, 600
 
@@ -18,128 +29,14 @@ prolongPaddle = False
 accBallSpeed = False
 shortenPaddle = False
 doubleBall = False
-
-
+waitTocontinue = True
 gamingFlag = False
 
-# pressLeft, pressRight = False, False
 
 liveBall = False
 oneTimeFlag = True
 gameOver = 0
 gameOver1 = 0
-
-# class Wall:
-#     def __init__(self):
-#         '''
-#         special function: 
-#         1. prolong, 2. shorten, 3. accelerate, 4. two balls 
-#         '''
-#         self.width = screen_width // cols
-#         self.height = 30
-#         self.matrix = []
-#         with open('level.txt') as f:
-#             lines = f.readlines()
-#             for line in lines:
-#                 line_row = []
-#                 for c in line.split(' '):
-#                     line_row.append(int(c))
-#                 self.matrix.append(line_row)
-    
-#     # create blocks of the breakout game
-#     def create_wall(self):
-#         self.blocks = []
-#         block_individual = []
-
-#         for row in range(rows):
-#             block_row = []
-#             for col in range(cols):
-#                 block_x = col * self.width
-#                 block_y = row * self.height
-
-#                 strength = self.matrix[row][col] // 10
-#                 special = self.matrix[row][col] % 10
-#                 if strength == 0:
-#                     col += 1
-#                     continue
-
-#                 lower_left = [-screen_width // 2 + (5 * (col + 1)) + block_x, screen_height // 2 - self.height - (5 * (row + 1)) - block_y]
-#                 higer_left = [-screen_width // 2 + (5 * (col + 1)) + block_x, screen_height // 2 - (5 * (row + 1)) - block_y]
-#                 higher_right = [-screen_width // 2 + self.width + (5 * (col + 1)) + block_x, screen_height // 2 - (5 * (row + 1)) - block_y]
-#                 lower_right = [-screen_width // 2 + self.width + (5 * (col + 1)) + block_x, screen_height // 2 - self.height - (5 * (row + 1)) - block_y]
-                
-#                 rect = [lower_left, higer_left, higher_right, lower_right]
-                
-#                 block_individual = [rect, strength, False, special] # x y position, strength, hit or not, special function
-
-#                 block_row.append(block_individual)
-
-#             self.blocks.append(block_row)
-
-#     # draw the blocks
-#     def draw(self):
-#         for row in self.blocks:
-#             for block in row:
-#                 if block[3] != 0:
-#                     glColor3f(1.0, 1.0, 0.0)
-#                 elif block[1] == 3:
-#                     # block_blue
-#                     glColor3f(69.0/255.0, 177.0/255.0, 232.0/255.0)
-#                 elif block[1] == 2:
-#                     # block_green
-#                     glColor3f(86.0/255.0, 174.0/255.0, 87.0/255.0)
-#                 elif block[1] == 1:
-#                     # block_red
-#                     glColor3f(242.0/255.0, 85.0/255.0, 96.0/255.0)
-#                 rect = block[0]
-#                 glBegin(GL_QUADS)
-#                 glVertex2f(rect[0][0], rect[0][1])
-#                 glVertex2f(rect[1][0], rect[1][1])
-#                 glVertex2f(rect[2][0], rect[2][1])
-#                 glVertex2f(rect[3][0], rect[3][1])
-#                 glEnd()
-#                 # glFlush()
-
-# class Paddle:
-#     def __init__(self):
-#         self.reset()
-
-#     # paddle movement
-#     def move(self):
-#         self.direction = 0
-#         if pressLeft:
-#             if self.rect[0][0] > -screen_width // 2:
-#                 self.rect[0][0] -= self.speed
-#                 self.rect[1][0] -= self.speed
-#                 self.direction = -1
-#         if pressRight:
-#             if self.rect[1][0] < screen_width // 2:
-#                 self.rect[0][0] += self.speed
-#                 self.rect[1][0] += self.speed
-#                 self.direction = 1
-
-#     # draw the paddle
-#     def draw(self):
-#         # glColor3f(142.0/255.0, 135.0/255.0, 123.0/255.0)
-#         glColor3f(1.0, 1.0, 1.0)
-#         glLineWidth(20)
-#         glBegin(GL_LINES)
-#         glVertex2f(self.rect[0][0], self.rect[0][1])
-#         glVertex2f(self.rect[1][0], self.rect[1][1])
-#         glEnd()
-    
-#     # def special(self):
-#     #     self.rect = [[-self.x - 100, -self.y], [self.x + 100, -self.y]]
-
-#     # initialize/reset the paddle
-#     def reset(self):
-#         self.height = 20
-#         self.width = screen_width // cols
-#         self.x = self.width // 2
-#         self.y = screen_height // 2 - self.height
-#         self.speed = 10
-#         self.rect = [[-self.x, -self.y], [self.x, -self.y]]
-#         self.direction = 0
     
 
 class Ball:
@@ -324,7 +221,7 @@ player_paddle = Paddle()
 ball = Ball(point_x, point_y)
 ball2 = Ball(point_x, point_y)
 
-# deltaTime = 0.0
+stopTime = 0.0
 
 # display the screen content
 def display():
@@ -342,7 +239,7 @@ def display():
     player_paddle.draw()
     ball.draw()
     
-    global oneTimeFlag, prolongPaddle, accBallSpeed, shortenPaddle, gamingFlag
+    global oneTimeFlag, prolongPaddle, accBallSpeed, shortenPaddle, gamingFlag, stopTime, waitTocontinue
     if prolongPaddle:
         if int(time.time() - phitTime) < 5:
             if oneTimeFlag:
@@ -392,15 +289,28 @@ def display():
             liveBall = False
 
     if not liveBall:
+        if waitTocontinue:
+            stopTime = time.time()
+            waitTocontinue = False
         if gameOver == 0:
             drawText(215, screen_height // 2 - 100, 'CLICK SPACE TO START')
+            gamingFlag = False
         elif gameOver == 1:
             drawText(265, screen_height // 2 - 100, 'YOU WIN')
-            drawText(215, screen_height // 2 - 150, 'CLICK SPACE TO START')
+            if int(time.time() - stopTime) < 3:
+                drawText(190, screen_height // 2 - 150, 'WAIT 3 SECONDS FOR RESTART') 
+                gamingFlag = True
+            else:
+                drawText(215, screen_height // 2 - 150, 'CLICK SPACE TO START')
+                gamingFlag = False
         elif gameOver == -1:
             drawText(265, screen_height // 2 - 100, 'YOU LOSE')
-            drawText(215, screen_height // 2 - 150, 'CLICK SPACE TO START')
-        gamingFlag = False
+            if int(time.time() - stopTime) < 3:
+                drawText(190, screen_height // 2 - 150, 'WAIT 3 SECONDS FOR RESTART') 
+                gamingFlag = True  
+            else:
+                drawText(215, screen_height // 2 - 150, 'CLICK SPACE TO START')
+                gamingFlag = False
 
     glFlush()
     glutPostRedisplay()
@@ -413,7 +323,7 @@ def init():
     gluOrtho2D(-screen_width/2, screen_width/2, -screen_height/2, screen_height/2)
 
 def keyPressed(key, x, y):
-    global liveBall, gamingFlag, doubleBall
+    global liveBall, gamingFlag, doubleBall, waitTocontinue
 
     # SPACE: start/restart the game
     if key == 32:
@@ -426,6 +336,7 @@ def keyPressed(key, x, y):
             wall.create_wall()
             gamingFlag = True
             doubleBall = False
+            waitTocontinue = True
 
 
     if key == GLUT_KEY_LEFT:
