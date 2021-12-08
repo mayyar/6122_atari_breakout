@@ -16,6 +16,7 @@ import threading
 from wall import *
 from paddle import *
 from ball import *
+import random
 
 screen_width, screen_height = 600, 600
 
@@ -34,11 +35,17 @@ waitTocontinue = True
 gamingFlag = False
 liveBall = False
 oneTimeFlag = True
+functionFlag1 = True
+functionFlag2 = True
+functionFlag3 = True
+functionFlag4 = True
 
 # game over control
 gameOver = 0
 gameOver1 = 0
-    
+
+gameLevel = 'level1.txt'
+level = 0
 
 class Ball:
     def __init__(self, x, y):
@@ -215,7 +222,7 @@ def drawText(x, y, s):
 
 
 wall = Wall()
-wall.create_wall()
+wall.create_wall(gameLevel)
 
 player_paddle = Paddle()
 
@@ -223,6 +230,8 @@ ball = Ball(point_x, point_y)
 ball2 = Ball(point_x, point_y)
 
 stopTime = 0.0
+deltaTime = 0.0
+
 
 # display the screen content
 def display():
@@ -240,8 +249,17 @@ def display():
     player_paddle.draw()
     ball.draw()
     
-    global oneTimeFlag, prolongPaddle, accBallSpeed, shortenPaddle, gamingFlag, stopTime, waitTocontinue
+    global oneTimeFlag, prolongPaddle, accBallSpeed, shortenPaddle, gamingFlag, stopTime, waitTocontinue, deltaTime
+    global functionFlag1, functionFlag2, functionFlag3, functionFlag4
+
     if prolongPaddle:
+        if functionFlag1:
+            deltaTime = time.time()
+            functionFlag1 = False
+        
+        if int(time.time() - deltaTime) < 0.8:
+            drawText(235, screen_height // 2 - 50, 'Prolong Paddle !')
+
         if int(time.time() - phitTime) < 5:
             if oneTimeFlag:
                 player_paddle.rect[0][0] = player_paddle.rect[0][0] - 50
@@ -254,6 +272,13 @@ def display():
             prolongPaddle = False
     
     if shortenPaddle:
+        if functionFlag2:
+            deltaTime = time.time()
+            functionFlag2 = False
+
+        if int(time.time() - deltaTime) < 0.8:
+            drawText(235, screen_height // 2 - 50, 'Shorten Paddle !')
+
         if int(time.time() - shitTime) < 5:
             if oneTimeFlag:
                 player_paddle.rect[0][0] = player_paddle.rect[0][0] + 20
@@ -266,6 +291,13 @@ def display():
             shortenPaddle = False
     
     if accBallSpeed:
+        if functionFlag3:
+            deltaTime = time.time()
+            functionFlag3 = False
+
+        if int(time.time() - deltaTime) < 0.8:
+            drawText(215, screen_height // 2 - 50, 'Accelerate Ball Speed !')
+
         if int(time.time() - ahitTime) < 5:
             if oneTimeFlag:
                 ball.speed_x *= 2
@@ -282,6 +314,13 @@ def display():
         player_paddle.move()
         gameOver = ball.move()
         if doubleBall:
+            if functionFlag4:
+                deltaTime = time.time()
+                functionFlag4 = False
+
+            if int(time.time() - deltaTime) < 0.8:
+                drawText(265, screen_height // 2 - 50, 'Double Ball !')
+
             ball2.draw()
             gameOver1 = ball2.move()
             if gameOver != 0 and gameOver1 != 0:
@@ -324,7 +363,9 @@ def init():
     gluOrtho2D(-screen_width/2, screen_width/2, -screen_height/2, screen_height/2)
 
 def keyPressed(key, x, y):
-    global liveBall, gamingFlag, doubleBall, waitTocontinue
+    global liveBall, gamingFlag, doubleBall, waitTocontinue, level
+    global functionFlag1, functionFlag2, functionFlag3, functionFlag4
+
 
     # SPACE: start/restart the game
     if key == 32:
@@ -334,10 +375,29 @@ def keyPressed(key, x, y):
             ball2.reset(player_paddle.x + (player_paddle.width // 2),
                     player_paddle.y - player_paddle.height)
             player_paddle.reset()
-            wall.create_wall()
+
+            level += 1
+            if level == 4:
+                level = 0
+
+            if level == 0:
+                gameLevel = 'level1.txt'
+            elif level == 1:
+                gameLevel = 'level2.txt'
+            elif level == 2:
+                gameLevel = 'level3.txt'
+            elif level == 3:
+                gameLevel = 'level4.txt'
+
+            print(level, gameLevel)
+            wall.create_wall(gameLevel)
             gamingFlag = True
             doubleBall = False
             waitTocontinue = True
+            functionFlag1 = True
+            functionFlag2 = True
+            functionFlag3 = True
+            functionFlag4 = True
 
 
     if key == GLUT_KEY_LEFT:

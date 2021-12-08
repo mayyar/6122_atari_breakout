@@ -1,8 +1,7 @@
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
-import time
-import threading
+import random
 
 screen_width, screen_height = 600, 600
 
@@ -17,17 +16,20 @@ class Wall:
         '''
         self.width = screen_width // cols
         self.height = 30
+        
+        
+    
+    # create blocks of the breakout game
+    def create_wall(self, level):
         self.matrix = []
-        with open('level.txt') as f:
+        with open(level) as f:
             lines = f.readlines()
             for line in lines:
                 line_row = []
                 for c in line.split(' '):
                     line_row.append(int(c))
                 self.matrix.append(line_row)
-    
-    # create blocks of the breakout game
-    def create_wall(self):
+
         self.blocks = []
         block_individual = []
 
